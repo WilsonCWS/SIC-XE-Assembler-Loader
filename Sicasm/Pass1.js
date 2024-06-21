@@ -71,7 +71,7 @@ export function pass1(fileContent) {
                             subtract = temp[2].indexOf('-');
                             add = temp[2].indexOf('+');
                             
-                            operator_num = (temp[2].match(/-/g) || []).length + (temp[2].match(/\+/g) || []).length;
+                            operator_num = (temp[2].match(/\-/g) || []).length + (temp[2].match(/\+/g) || []).length;
                             
                             if (operator_num === 1) {
                                 let op1 = '';
@@ -105,7 +105,7 @@ export function pass1(fileContent) {
                                     }
                                 }
                                 SYMTAB[temp[0]] = res.toString(16).toUpperCase().padStart(4, '0');
-                                Interfile.push(`${LOC.toString(16).toUpperCase().padStart(4, '0')} ${line}`);
+                                Interfile.push(`${res.toString(16).toUpperCase().padStart(4, '0')} ${line}`);
                             } else {
                                 let res = 0;
                                 let op1 = '';
@@ -129,25 +129,24 @@ export function pass1(fileContent) {
                             
                                         if (op1 !== '' && op2 !== '' && operator !== '') {
                                             if (operator === '+') {
-                                                if (!isNaN(op1) && !isNaN(op2)) {
-                                                    res += parseInt(op1, 16) + parseInt(op2, 16);
-                                                } else if (!isNaN(op1) && op2 in SYMTAB) {
-                                                    res += parseInt(op1, 16) + parseInt(SYMTAB[op2], 16);
-                                                } else if (op1 in SYMTAB && !isNaN(op2)) {
-                                                    res += parseInt(SYMTAB[op1], 16) + parseInt(op2, 16);
+                                                if (op1 in SYMTAB && op2 in SYMTAB) {
+                                                    res = parseInt(SYMTAB[op1], 16) + parseInt(SYMTAB[op2], 16);
+                                                } else if (!isNaN(op1) && !isNaN(op2)) {
+                                                    res = parseInt(op1) + parseInt(op2);
+                                                } else if (!isNaN(op1)) {
+                                                    res = parseInt(op1) + parseInt(SYMTAB[op2], 16);
                                                 } else {
-                                                    res += parseInt(SYMTAB[op1], 16) + parseInt(SYMTAB[op2], 16);
+                                                    res = parseInt(SYMTAB[op1], 16) + parseInt(op2);
                                                 }
-                                                
                                             } else if (operator === '-') {
-                                                if (!isNaN(op1) && !isNaN(op2)) {
-                                                    res += parseInt(op1, 16) - parseInt(op2, 16);
-                                                } else if (!isNaN(op1) && op2 in SYMTAB) {
-                                                    res += parseInt(op1, 16) - parseInt(SYMTAB[op2], 16);
-                                                } else if (op1 in SYMTAB && !isNaN(op2)) {
-                                                    res += parseInt(SYMTAB[op1], 16) - parseInt(op2, 16);
+                                                if (op1 in SYMTAB && op2 in SYMTAB) {
+                                                    res = parseInt(SYMTAB[op1], 16) - parseInt(SYMTAB[op2], 16);
+                                                } else if (!isNaN(op1) && !isNaN(op2)) {
+                                                    res = parseInt(op1) - parseInt(op2);
+                                                } else if (!isNaN(op1)) {
+                                                    res = parseInt(op1) - parseInt(SYMTAB[op2], 16);
                                                 } else {
-                                                    res += parseInt(SYMTAB[op1], 16) - parseInt(SYMTAB[op2], 16);
+                                                    res = parseInt(SYMTAB[op1], 16) - parseInt(op2);
                                                 }
                                             }
                                             op1 = res.toString();
@@ -229,6 +228,5 @@ export function pass1(fileContent) {
             }
         }
     });
-
     return {Interfile, SYMTAB, ProgramName};
 }
